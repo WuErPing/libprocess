@@ -1161,6 +1161,7 @@ void* serve(void* arg)
 void* schedule(void* arg)
 {
   do {
+		// 将runq队列中的process逐个出队列
     ProcessBase* process = process_manager->dequeue();
     if (process == NULL) {
       Gate::state_t old = gate->approach();
@@ -1172,6 +1173,7 @@ void* schedule(void* arg)
         gate->leave();
       }
     }
+		// 恢复一个process
     process_manager->resume(process);
   } while (true);
 }
@@ -2363,6 +2365,7 @@ UPID ProcessManager::spawn(ProcessBase* process, bool manage)
 
 void ProcessManager::resume(ProcessBase* process)
 {
+	// ThreadLocal
   __process__ = process;
 
   VLOG(2) << "Resuming " << process->pid << " at " << Clock::now();
