@@ -563,7 +563,7 @@ bool Clock::paused()
 
 void Clock::resume()
 {
-  // ä¿è¯ libev çš„ watchers å·²ç»å‡†å¤‡å¥½
+  // ±£Ö¤ libev µÄ watchers ÒÑ¾­×¼±¸ºÃ
   process::initialize(); // To make sure the libev watchers are ready.
 
   synchronized (timeouts) {
@@ -1162,7 +1162,7 @@ void* serve(void* arg)
 void* schedule(void* arg)
 {
   do {
-    // å°† process_manager.runq ä¸­çš„ process é€ä¸ª dequeue
+    // ½« process_manager.runq ÖĞµÄ process Öğ¸ö dequeue
     ProcessBase* process = process_manager->dequeue();
     if (process == NULL) {
       Gate::state_t old = gate->approach();
@@ -1174,7 +1174,7 @@ void* schedule(void* arg)
         gate->leave();
       }
     }
-    // æ¢å¤ process
+    // »Ö¸´ process
     process_manager->resume(process);
   } while (true);
 }
@@ -2387,7 +2387,7 @@ void ProcessManager::resume(ProcessBase* process)
 
     process->lock();
     {
-      if (process->events.size() > 0) { // process ä¸­æœ‰ event
+      if (process->events.size() > 0) { // process ÖĞÓĞ event
         event = process->events.front(); 
         process->events.pop_front(); 
         process->state = ProcessBase::RUNNING;
@@ -2398,7 +2398,7 @@ void ProcessManager::resume(ProcessBase* process)
     }
     process->unlock();
 
-    if (!blocked) { // å¦‚æœæœ‰äº‹ä»¶
+    if (!blocked) { // Èç¹ûÓĞÊÂ¼ş
       CHECK(event != NULL);
 
       // Determine if we should filter this event.
@@ -2446,7 +2446,7 @@ void ProcessManager::resume(ProcessBase* process)
 
       // Now service the event.
       try {
-        // visitor æ¨¡å¼ï¼Œå¤„ç†äº‹ä»¶
+        // visitor Ä£Ê½£¬´¦ÀíÊÂ¼ş
         process->serve(*event);
       } catch (const std::exception& e) {
         std::cerr << "libprocess: " << process->pid
@@ -2459,7 +2459,7 @@ void ProcessManager::resume(ProcessBase* process)
         terminate = true;
       }
 
-      // äº‹ä»¶å¤„ç†å®Œæˆåè¢«åˆ é™¤
+      // ÊÂ¼ş´¦ÀíÍê³Éºó±»É¾³ı
       delete event;
 
       if (terminate) {

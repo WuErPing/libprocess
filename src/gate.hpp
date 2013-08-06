@@ -29,12 +29,12 @@ public:
     pthread_mutex_destroy(&mutex);
   }
 
-  // å¼€é—¨
+  // ¿ªÃÅ
   void open(bool all = true)
   {
     pthread_mutex_lock(&mutex);
     {
-      state++; // çŠ¶æ€+1
+      state++; // ×´Ì¬+1
       if (all) 
         pthread_cond_broadcast(&cond);
       else 
@@ -43,25 +43,25 @@ public:
     pthread_mutex_unlock(&mutex);
   }
 
-  // ç­‰å¾…
+  // µÈ´ı
   void wait()
   {
     pthread_mutex_lock(&mutex);
     {
-      // ç­‰å€™è€…+1
+      // µÈºòÕß+1
       waiters++; 
       state_t old = state;
-      // ç­‰å¾…å¼€é—¨åçŠ¶æ€å˜åŒ–
-      while (old == state) // é¿å… spurious wakeup
+      // µÈ´ı¿ªÃÅºó×´Ì¬±ä»¯
+      while (old == state) // ±ÜÃâ spurious wakeup
         pthread_cond_wait(&cond, &mutex);
-      // å·²å¼€é—¨ï¼Œç­‰å€™è€…-1
+      // ÒÑ¿ªÃÅ£¬µÈºòÕß-1
       waiters--;
     }
     pthread_mutex_unlock(&mutex);
   }
 
-  // approach ä¸ arrive çœ‹èµ·æ¥æ˜¯å°†ä¸Šé¢çš„å‡½æ•°åˆ†æˆäº†ä¸¤æ®µ
-  // é è¿‘
+  // approach Óë arrive ¿´ÆğÀ´ÊÇ½«ÉÏÃæµÄº¯Êı·Ö³ÉÁËÁ½¶Î
+  // ¿¿½ü
   state_t approach()
   {
     state_t old;
@@ -74,7 +74,7 @@ public:
     return old;
   }
 
-  // åˆ°è¾¾
+  // µ½´ï
   void arrive(state_t old)
   {
     pthread_mutex_lock(&mutex);
@@ -87,7 +87,7 @@ public:
     pthread_mutex_unlock(&mutex);
   }
 
-  // ç¦»å¼€
+  // Àë¿ª
   void leave()
   {
     pthread_mutex_lock(&mutex);
@@ -97,7 +97,7 @@ public:
     pthread_mutex_unlock(&mutex);
   }
 
-	// æ²¡æœ‰ç­‰å€™è€…
+	// Ã»ÓĞµÈºòÕß
   bool empty()
   {
     bool occupied = true;
