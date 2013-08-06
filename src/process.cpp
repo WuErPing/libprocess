@@ -563,6 +563,7 @@ bool Clock::paused()
 
 void Clock::resume()
 {
+  // 保证 libev 的 watchers 已经准备好
   process::initialize(); // To make sure the libev watchers are ready.
 
   synchronized (timeouts) {
@@ -1161,7 +1162,7 @@ void* serve(void* arg)
 void* schedule(void* arg)
 {
   do {
-		// ��runq�����е�process���������
+    // 将 process_manager.runq 中的 process 逐个 dequeue
     ProcessBase* process = process_manager->dequeue();
     if (process == NULL) {
       Gate::state_t old = gate->approach();
@@ -1173,7 +1174,7 @@ void* schedule(void* arg)
         gate->leave();
       }
     }
-		// �ָ�һ��process
+    // 恢复 process
     process_manager->resume(process);
   } while (true);
 }
@@ -2365,7 +2366,6 @@ UPID ProcessManager::spawn(ProcessBase* process, bool manage)
 
 void ProcessManager::resume(ProcessBase* process)
 {
-	// ThreadLocal
   __process__ = process;
 
   VLOG(2) << "Resuming " << process->pid << " at " << Clock::now();
@@ -2387,9 +2387,9 @@ void ProcessManager::resume(ProcessBase* process)
 
     process->lock();
     {
-      if (process->events.size() > 0) {
-        event = process->events.front();
-        process->events.pop_front();
+      if (process->events.size() > 0) { // process 中有 event
+        event = process->events.front(); 
+        process->events.pop_front(); 
         process->state = ProcessBase::RUNNING;
       } else {
         process->state = ProcessBase::BLOCKED;
@@ -2398,7 +2398,7 @@ void ProcessManager::resume(ProcessBase* process)
     }
     process->unlock();
 
-    if (!blocked) {
+    if (!blocked) { // 如果有事件
       CHECK(event != NULL);
 
       // Determine if we should filter this event.
@@ -2446,6 +2446,7 @@ void ProcessManager::resume(ProcessBase* process)
 
       // Now service the event.
       try {
+        // visitor 模式，处理事件
         process->serve(*event);
       } catch (const std::exception& e) {
         std::cerr << "libprocess: " << process->pid
@@ -2458,6 +2459,7 @@ void ProcessManager::resume(ProcessBase* process)
         terminate = true;
       }
 
+      // 事件处理完成后被删除
       delete event;
 
       if (terminate) {
