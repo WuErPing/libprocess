@@ -180,10 +180,10 @@ private:
   // Process states.
   enum { BOTTOM,
          READY,
-	 RUNNING,
+         RUNNING,
          BLOCKED,
          TERMINATING,
-	 TERMINATED } state;
+         TERMINATED } state;
 
   // Mutex protecting internals.
   // TODO(benh): Consider replacing with a spinlock, on multi-core systems.
